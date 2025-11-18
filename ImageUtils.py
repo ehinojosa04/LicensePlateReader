@@ -11,7 +11,6 @@ Image = NDArray[np.uint8]
 def umbralization(img: np.ndarray):    
     values = img.ravel()
 
-
     L = int(values.max()) + 1
 
     histogram = [0] * L
@@ -47,6 +46,7 @@ def umbralization(img: np.ndarray):
 
 class fragment:
     def __init__(self) -> None:
+        self.edge: np.ndarray
         self.coords: List[Tuple[int,int]] = []
         self.size = 0
 
@@ -93,6 +93,46 @@ def extractFragments(image: np.ndarray, mask_type: Literal["cross", "rect"]) -> 
     
     return fragments
 
+
+def order_points(pts):
+    pts = np.asarray(pts, np.float32)
+    s = pts.sum(axis=1)
+    d = np.diff(pts, axis=1)
+    return np.array([
+        pts[np.argmin(s)],            
+        pts[np.argmin(d)],            
+        pts[np.argmax(s)],            
+        pts[np.argmax(d)]             
+    ], dtype=np.float32)
+
+def quad_from_min_area_rect(f):
+    pts = np.array([(x, y) for (y, x) in f.coords], dtype=np.float32)
+
+    rect = cv.minAreaRect(pts)
+    box  = cv.boxPoints(rect).astype(np.float32)
+    quad = order_points(box)
+    return quad
+
+def warp_quad(image, quad, enforce_ratio=None):
+    wA = np.linalg.norm(quad[1]-quad[0])   
+    wB = np.linalg.norm(quad[2]-quad[3])   
+    hA = np.linalg.norm(quad[3]-quad[0])   
+    hB = np.linalg.norm(quad[2]-quad[1])   
+    W = int(np.ceil(max(wA, wB)))
+    H = int(np.ceil(max(hA, hB)))
+
+    if enforce_ratio is not None:
+        H = int(max(1, round(W / enforce_ratio)))
+
+    dst = np.array([[0,0],[W-1,0],[W-1,H-1],[0,H-1]], np.float32)
+
+    Hmat = cv.getPerspectiveTransform(quad, dst)
+    out  = cv.warpPerspective(
+        image, Hmat, (W, H),
+        flags=cv.INTER_CUBIC,                     
+        borderMode=cv.BORDER_REPLICATE
+    )
+    return out, Hmat
 
 
 def showScaledImage(name: str, image: np.ndarray, scale: float | int) -> None:
