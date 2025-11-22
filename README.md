@@ -1,16 +1,16 @@
 | |
 |:--:|
 | ![Logo Universidad Panamericana](./Escudo_Universidad_Panamericana.png) |
-| **ISGC** |
+| **Ingeniería en Sistemas y Gráficos Computacionales** |
 | **Técnicas de Interpretación Avanzadas** |
 | **Profesor: José Abdón Ramirez Ruiz** |
+| **Equipo 10** |
 | **José Salcedo Uribe** |
 | **Emiliano Hinojosa Guzmán** |
 | **November 21, 2025** |
 
 # **LICENSE PLATE RECOGNITION USING IMAGE PROCESSING AND OCR**
 
-**Project Report**
 # **Table of Contents**
 
 1. **Introduction**
